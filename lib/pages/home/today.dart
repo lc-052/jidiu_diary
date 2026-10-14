@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../widgets/week_mood_card.dart';
 class TodayPage extends StatefulWidget {
   const TodayPage({super.key});
 
@@ -9,6 +10,12 @@ class TodayPage extends StatefulWidget {
 class _TodayPageState extends State<TodayPage> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      body: SafeArea(child: ListView(
+        children: [
+          WeekMoodCard(),
+        ],
+      )),
+    );
   }
 }
