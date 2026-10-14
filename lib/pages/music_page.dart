@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../theme/theme_controller.dart';
 class MusicPage extends StatefulWidget {
-  const MusicPage({super.key});
+  final ThemeController themeController;
+  const MusicPage({required this.themeController, super.key});
 
   @override
   State<MusicPage> createState() => _MusicPageState();
