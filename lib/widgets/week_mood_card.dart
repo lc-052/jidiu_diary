@@ -2,8 +2,24 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import 'mood_calendar.dart';
+
 class WeekMoodCard extends StatefulWidget {
-  const WeekMoodCard({super.key});
+  const WeekMoodCard({
+    super.key,
+    this.onTodayMoodChanged,
+    this.onPastDateSelected,
+    this.onDateSelected,
+    this.currentDate,
+    this.dailyMoods = const {},
+    this.onDailyMoodChanged,
+  });
+  final ValueChanged<DateTime>? onPastDateSelected;
+  final ValueChanged<DateTime>? onDateSelected;
+  final DateTime? currentDate;
+  final ValueChanged<int>? onTodayMoodChanged;
+  final Map<DateTime, int> dailyMoods;
+  final void Function(DateTime date, int mood)? onDailyMoodChanged;
 
   @override
   State<WeekMoodCard> createState() => _WeekMoodCardState();
@@ -14,7 +30,8 @@ class _WeekMoodCardState extends State<WeekMoodCard> {
   static const _emojis = ['😊', '😌', '😨', '😡', '😐'];
   static const _moodLabels = ['开心', '平静', '惊恐', '生气', '一般'];
 
-  late final DateTime _monday;
+  late DateTime _monday;
+  late final DateTime _today;
   late DateTime _selectedDate;
   bool _showMoodPicker = false;
   final Map<DateTime, int> _moods = {};
@@ -22,34 +39,41 @@ class _WeekMoodCardState extends State<WeekMoodCard> {
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
+    final now = widget.currentDate ?? DateTime.now();
+    _today = DateTime(now.year, now.month, now.day);
     _monday = DateTime(now.year, now.month, now.day - now.weekday + 1);
     _selectedDate = DateTime(now.year, now.month, now.day);
+  }
+
+  Future<void> _openCalendar() async {
+    final date = await showMoodCalendar(
+      context,
+      initialDate: _selectedDate,
+      currentDate: _today,
+      moods: {..._moods, ...widget.dailyMoods},
+    );
+    if (date == null || !mounted) return;
+    setState(() {
+      _selectedDate = date;
+      _monday = DateTime(date.year, date.month, date.day - date.weekday + 1);
+      _showMoodPicker = false;
+    });
+    widget.onDateSelected?.call(date);
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = colors.primary;
-    final frameColor = isDark
-        ? const Color(0xFF2B2340)
-        : const Color(0xFFF5F2FF);
-    final tintColor = isDark
-        ? const Color(0xFF3D3058)
-        : const Color(0xFFEEE7FF);
-    final lineColor = isDark
-        ? const Color(0xFF4A3C63)
-        : const Color(0xFFE7DFFF);
-    final mutedColor = isDark
-        ? const Color(0xFFB5ABC9)
-        : const Color(0xFF8585A6);
+    final tintColor = colors.surfaceContainerLow;
+    final lineColor = colors.outlineVariant;
+    final mutedColor = colors.onSurfaceVariant;
 
     return Container(
       margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(15),
+      padding: EdgeInsets.zero,
       decoration: BoxDecoration(
-        color: frameColor,
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(26),
       ),
       child: Column(
@@ -70,21 +94,24 @@ class _WeekMoodCardState extends State<WeekMoodCard> {
                         child: Text(
                           '本周心情',
                           style: TextStyle(
-                            fontSize: 28,
+                            fontSize: 20,
                             fontWeight: FontWeight.w700,
                             color: colors.onSurface,
                           ),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: frameColor,
-                          borderRadius: BorderRadius.circular(24),
+                      TextButton(
+                        key: const ValueKey('week-calendar-button'),
+                        onPressed: _openCalendar,
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 10,
+                          ),
+                          backgroundColor: colors.surface,
+                          side: BorderSide(color: lineColor),
+                          shape: const StadiumBorder(),
                         ),
                         child: Text(
                           '${_selectedDate.year}年${_selectedDate.month}月',
@@ -98,7 +125,7 @@ class _WeekMoodCardState extends State<WeekMoodCard> {
                   ),
                   const SizedBox(height: 14),
                   Text(
-                    '点击日期，留下今天的小心情',
+                    '点击日期记录心情',
                     style: TextStyle(fontSize: 14, color: mutedColor),
                   ),
                   const SizedBox(height: 14),
@@ -116,23 +143,62 @@ class _WeekMoodCardState extends State<WeekMoodCard> {
                             _monday.day + index,
                           );
                           final selected = date == _selectedDate;
-                          final mood = _moods[date];
+                          final future = date.isAfter(_today);
+                          final mood = widget.dailyMoods[date] ?? _moods[date];
 
                           return Expanded(
                             child: Semantics(
                               button: true,
+                              enabled: !future,
                               selected: selected,
                               label:
                                   '${date.month}月${date.day}日，${_weekdays[index]}${mood == null ? '' : '，${_moodLabels[mood]}'}',
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(24),
-                                onTap: () => setState(() {
-                                  _selectedDate = date;
-                                  _showMoodPicker = true;
-                                }),
-                                child: Padding(
+                                onTap: future
+                                    ? null
+                                    : () {
+                                        setState(() {
+                                          _selectedDate = date;
+                                          _showMoodPicker = true;
+                                        });
+                                        widget.onDateSelected?.call(date);
+                                        if (date.isBefore(_today)) {
+                                          widget.onPastDateSelected?.call(date);
+                                        }
+                                      },
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 180),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(24),
+                                    gradient: selected
+                                        ? LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [
+                                              Color.lerp(
+                                                primary,
+                                                colors.onPrimary,
+                                                .08,
+                                              )!,
+                                              primary,
+                                            ],
+                                          )
+                                        : null,
+                                    boxShadow: selected
+                                        ? [
+                                            BoxShadow(
+                                              color: primary.withValues(
+                                                alpha: 0.25,
+                                              ),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 3),
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
                                   padding: const EdgeInsets.symmetric(
-                                    vertical: 2,
+                                    vertical: 6,
                                   ),
                                   child: Column(
                                     children: [
@@ -146,13 +212,19 @@ class _WeekMoodCardState extends State<WeekMoodCard> {
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           color: selected
-                                              ? primary
+                                              ? colors.surface
                                               : mood != null
                                               ? tintColor
                                               : colors.surface,
                                           border: Border.all(
                                             color: selected
-                                                ? primary
+                                                ? primary.withValues(
+                                                    alpha: 0.35,
+                                                  )
+                                                : future
+                                                ? lineColor.withValues(
+                                                    alpha: 0.5,
+                                                  )
                                                 : lineColor,
                                           ),
                                         ),
@@ -163,7 +235,11 @@ class _WeekMoodCardState extends State<WeekMoodCard> {
                                           style: TextStyle(
                                             fontSize: 16,
                                             color: selected
-                                                ? colors.onPrimary
+                                                ? primary
+                                                : future
+                                                ? mutedColor.withValues(
+                                                    alpha: 0.45,
+                                                  )
                                                 : colors.onSurface,
                                           ),
                                         ),
@@ -174,7 +250,11 @@ class _WeekMoodCardState extends State<WeekMoodCard> {
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: selected
-                                              ? primary
+                                              ? colors.onPrimary
+                                              : future
+                                              ? mutedColor.withValues(
+                                                  alpha: 0.45,
+                                                )
                                               : mutedColor,
                                         ),
                                       ),
@@ -210,17 +290,29 @@ class _WeekMoodCardState extends State<WeekMoodCard> {
                         return Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: List.generate(_emojis.length, (index) {
-                            final selected = _moods[_selectedDate] == index;
+                            final selected =
+                                (widget.dailyMoods[_selectedDate] ??
+                                    _moods[_selectedDate]) ==
+                                index;
                             return Semantics(
                               button: true,
                               selected: selected,
                               label: _moodLabels[index],
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(19),
-                                onTap: () => setState(() {
-                                  _moods[_selectedDate] = index;
-                                  _showMoodPicker = false;
-                                }),
+                                onTap: () {
+                                  setState(() {
+                                    _moods[_selectedDate] = index;
+                                    _showMoodPicker = false;
+                                  });
+                                  widget.onDailyMoodChanged?.call(
+                                    _selectedDate,
+                                    index,
+                                  );
+                                  if (_selectedDate == _today) {
+                                    widget.onTodayMoodChanged?.call(index);
+                                  }
+                                },
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 180),
                                   width: size,
@@ -255,7 +347,6 @@ class _WeekMoodCardState extends State<WeekMoodCard> {
             ),
           ),
           const SizedBox(height: 14),
-
         ],
       ),
     );

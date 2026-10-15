@@ -32,6 +32,7 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+**/.kotlin/
 
 # Symbolication related
 app.*.symbols
@@ -46,3 +47,17 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Local previews and release output
+/output/
+/releases/
+/* Review*.png
+/Tarot Generation Notes.txt
+/tarot-card-list.json
+
+# Signing credentials and local environment
+*.jks
+*.keystore
+**/key.properties
+.env
+.env.*

@@ -40,11 +40,9 @@ class MusicMenuButton extends StatelessWidget {
         tooltip: '音乐',
         style: IconButton.styleFrom(
           foregroundColor: colors.primary,
-          backgroundColor: colors.primary.withValues(alpha: 0.1),
+          backgroundColor: colors.surface,
           minimumSize: const Size(48, 48),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: const CircleBorder(),
         ),
         icon: const Icon(Icons.music_note_rounded, size: 23),
         onPressed: () =>

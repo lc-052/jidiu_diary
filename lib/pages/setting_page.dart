@@ -1,217 +1,151 @@
 import 'package:flutter/material.dart';
 
 import '../theme/theme_controller.dart';
+import '../widgets/app_background.dart';
 import '../widgets/music_import_card.dart';
+import '../widgets/data_backup_card.dart';
 
-class SettingPage extends StatefulWidget {
-  final ThemeController themeController;
-
+class SettingPage extends StatelessWidget {
   const SettingPage({required this.themeController, super.key});
-
-  @override
-  State<SettingPage> createState() => _SettingPageState();
-}
-
-class _SettingPageState extends State<SettingPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("设置")),
-      body: ListenableBuilder(
-        listenable: widget.themeController,
-        builder: (context, child) {
-          return SafeArea(
-            child: ListView(
-              children: [
-                ThemeSetting(themeController: widget.themeController),
-                const MusicImportCard(),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class ThemeSetting extends StatefulWidget {
   final ThemeController themeController;
-  const ThemeSetting({required this.themeController, super.key});
 
   @override
-  State<ThemeSetting> createState() => _ThemeSettingState();
-}
-
-class _ThemeSettingState extends State<ThemeSetting> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(10.0),
-      padding: EdgeInsets.all(10.0),
-      height: 280,
-      width: double.infinity,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(30.0)),
-      child: Column(
-        children: [
-          Text(
-            "外观设置",
-            style: TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold),
-          ),
-          Row(
+  Widget build(BuildContext context) => AppBackground(
+    child: Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: const Text('设置'),
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+      ),
+      body: ListenableBuilder(
+        listenable: themeController,
+        builder: (context, child) => SafeArea(
+          child: ListView(
             children: [
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    widget.themeController.setThemeMode(ThemeMode.system);
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(10.0),
-                    margin: EdgeInsets.all(10.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color:
-                            widget.themeController.themeMode == ThemeMode.system
-                            ? Theme.of(context).colorScheme.primary
-                            : Colors.transparent,
-                        width: 2,
-                      ),
-                    ),
-                    height: 150,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Icon(
-                          Icons.devices,
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 20,
-                        ),
-
-                        Text(
-                          "跟随系统",
-                          style: TextStyle(fontSize: 15.0, color: Colors.black),
-                        ),
-                        Icon(
-                          widget.themeController.themeMode == ThemeMode.system
-                              ? Icons.check_circle_outline
-                              : Icons.circle,
-                          color:
-                              widget.themeController.themeMode ==
-                                  ThemeMode.system
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.grey,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    widget.themeController.setThemeMode(ThemeMode.light);
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(10.0),
-                    margin: EdgeInsets.all(10.0),
-                    decoration: BoxDecoration(
-                      color: Color(0xFFC7BAEC),
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color:
-                            widget.themeController.themeMode == ThemeMode.light
-                            ? Theme.of(context).colorScheme.primary
-                            : Colors.transparent,
-                        width: 2,
-                      ),
-                    ),
-                    height: 150,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Icon(
-                          Icons.light_mode_outlined,
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 20,
-                        ),
-
-                        Text(
-                          "浅色模式",
-                          style: TextStyle(fontSize: 15.0, color: Colors.black),
-                        ),
-                        Icon(
-                          widget.themeController.themeMode == ThemeMode.light
-                              ? Icons.check_circle_outline
-                              : Icons.circle,
-                          color:
-                              widget.themeController.themeMode ==
-                                  ThemeMode.light
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.grey,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    widget.themeController.setThemeMode(ThemeMode.dark);
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(10.0),
-                    margin: EdgeInsets.all(10.0),
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color:
-                            widget.themeController.themeMode == ThemeMode.dark
-                            ? Theme.of(context).colorScheme.primary
-                            : Colors.transparent,
-                        width: 2,
-                      ),
-                    ),
-                    height: 150,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Icon(
-                          Icons.dark_mode_outlined,
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 20,
-                        ),
-
-                        Text(
-                          "深色模式",
-                          style: TextStyle(fontSize: 15.0, color: Colors.white),
-                        ),
-                        Icon(
-                          widget.themeController.themeMode == ThemeMode.dark
-                              ? Icons.check_circle_outline
-                              : Icons.circle,
-                          color:
-                              widget.themeController.themeMode == ThemeMode.dark
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.grey,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              ThemeSetting(themeController: themeController),
+              const MusicImportCard(),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 0, 16, 20),
+                child: DataBackupCard(),
               ),
             ],
           ),
-          Text(
-            "选择您喜欢的主题外观，点击卡片即可切换",
-            style: TextStyle(fontSize: 15.0, color: Colors.grey),
+        ),
+      ),
+    ),
+  );
+}
+
+class ThemeSetting extends StatelessWidget {
+  const ThemeSetting({required this.themeController, super.key});
+  final ThemeController themeController;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    const modes = [ThemeMode.system, ThemeMode.light, ThemeMode.dark];
+    const labels = ['跟随系统', '浅色模式', '深色模式'];
+    const icons = [
+      Icons.devices_rounded,
+      Icons.light_mode_outlined,
+      Icons.dark_mode_outlined,
+    ];
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      child: Material(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(26),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '外观设置',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: colors.onSurface,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: List.generate(3, (index) {
+                  final selected = themeController.themeMode == modes[index];
+                  return Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(right: index == 2 ? 0 : 8),
+                      child: Material(
+                        color: colors.primary.withValues(
+                          alpha: selected ? 0.12 : 0.04,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18),
+                          side: BorderSide(
+                            color: selected
+                                ? colors.primary
+                                : colors.primary.withValues(alpha: 0.08),
+                            width: selected ? 2 : 1,
+                          ),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () =>
+                              themeController.setThemeMode(modes[index]),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 16,
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  icons[index],
+                                  size: 24,
+                                  color: colors.primary,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  labels[index],
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: colors.onSurface,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Icon(
+                                  selected
+                                      ? Icons.check_circle_rounded
+                                      : Icons.circle_outlined,
+                                  size: 18,
+                                  color: selected
+                                      ? colors.primary
+                                      : colors.onSurfaceVariant.withValues(
+                                          alpha: 0.4,
+                                        ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                '选择喜欢的外观，让记录更自在',
+                style: TextStyle(fontSize: 12, color: colors.onSurfaceVariant),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
