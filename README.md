@@ -49,13 +49,15 @@
 
 | 文件 | 用途 |
 | --- | --- |
-| `jidiu_diary-v1.1.0-android.apk` | Android 通用安装包 |
+| `jidiu_diary-v1.1.0-arm64-v8a.apk` | 大多数较新 Android 手机，优先下载 |
+| `jidiu_diary-v1.1.0-armeabi-v7a.apk` | 32 位 ARM Android 设备 |
+| `jidiu_diary-v1.1.0-x86_64.apk` | x86_64 Android 设备或模拟器 |
 | `jidiu_diary-v1.1.0-web.zip` | Web 静态网站构建产物，解压后部署到 HTTP / HTTPS 服务 |
 | `SHA256SUMS.txt` | 发布文件的 SHA-256 校验值 |
 
-Web 构建不能直接双击 `index.html` 使用，需要静态服务器。浏览器可能要求用户先点击播放才能播放音频。
+Web 构建不能直接双击 `index.html` 使用，需要部署到静态服务器的根路径。部署到子目录时，请按实际路径重新设置 `--base-href`（例如 `/jidiu_diary/`）并构建。浏览器可能要求用户先点击播放才能播放音频。
 
-Android 包目前沿用模板的调试签名，供体验与测试；应用商店发行需要配置正式签名。若旧包签名不同，请先在旧版备份数据，再处理安装冲突。iOS、macOS、Windows 与 Linux 保留工程入口，本次发布不提供这些平台的安装包，也不将其视为已经完成真机验收。
+Android 最低需要 Android 7.0（API 24），按 CPU 架构分包以减少下载大小，无需下载全部 APK。安装包目前沿用模板的调试签名，供体验与测试；应用商店发行需要配置正式签名。若旧包签名不同，请先在旧版备份数据，再处理安装冲突。iOS、macOS、Windows 与 Linux 保留工程入口，本次发布不提供这些平台的安装包，也不将其视为已经完成真机验收。
 
 ## 数据与备份
 
@@ -89,11 +91,11 @@ flutter run
 ```sh
 flutter analyze
 flutter test
-flutter build apk --release
-flutter build web --release --base-href ./
+flutter build apk --release --split-per-abi
+flutter build web --release
 ```
 
-Android 输出位于 `build/app/outputs/flutter-apk/app-release.apk`，Web 输出位于 `build/web/`。项目测试覆盖日记与草稿持久化、图片和涂鸦、每日心情、日历、塔罗随机与历史记录、音乐状态联动、备份恢复、明暗主题和主卡片切换。
+Android 输出位于 `build/app/outputs/flutter-apk/`，文件名形如 `app-arm64-v8a-release.apk`；Web 输出位于 `build/web/`。项目测试覆盖日记与草稿持久化、图片和涂鸦、每日心情、日历、塔罗随机与历史记录、音乐状态联动、备份恢复、明暗主题和主卡片切换。
 
 ### 工程结构
 
@@ -111,10 +113,10 @@ lib/
   theme/                浅色、深色主题
   widgets/              心情日历、播放器、功能卡片与备份卡片
 test/                   数据与界面自动化测试
-tool/                   应用图标生成工具
+tool/                   应用图标生成与塔罗素材压缩工具
 ```
 
-内置音频放在 `lib/assets/audio/`；心情形象放在 `lib/assets/emoji/`；塔罗素材放在 `lib/assets/Tarot Deck/`。素材目录已在 `pubspec.yaml` 注册，新增素材后需要重新构建应用。
+内置音频放在 `lib/assets/audio/`；心情形象放在 `lib/assets/emoji/`。塔罗原始 PNG 保留在 `lib/assets/Tarot Deck/`，应用仅打包 `lib/assets/tarot_webp/` 中的压缩 WebP，不打包原图。WebP 最大尺寸为 768 × 1152，编码质量为 86；牌面 ID 不变，历史抽牌记录继续使用。更新原图后，安装 Pillow 并运行 `python tool/compress_tarot.py` 生成压缩素材，再重新构建应用。
 
 ## 素材与项目说明
 

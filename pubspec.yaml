@@ -72,7 +72,7 @@ flutter:
     - lib/assets/
     - lib/assets/audio/
     - lib/assets/emoji/
-    - lib/assets/Tarot Deck/
+    - lib/assets/tarot_webp/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

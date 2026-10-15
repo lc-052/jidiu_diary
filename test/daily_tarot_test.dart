@@ -197,8 +197,15 @@ void main() {
       final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
       final images = manifest
           .listAssets()
-          .where((name) => name.startsWith('lib/assets/Tarot Deck/'))
+          .where((name) => name.startsWith('lib/assets/tarot_webp/'))
           .toSet();
+      expect(
+        manifest.listAssets().any(
+          (name) => name.startsWith('lib/assets/Tarot Deck/'),
+        ),
+        isFalse,
+        reason: 'Original PNG artwork must not inflate the app bundle',
+      );
       expect(TarotDeck.cards.length, 78);
       expect(TarotDeck.cards.map((card) => card.id).toSet().length, 78);
       expect(TarotDeck.cards.map((card) => card.asset).toSet(), images);

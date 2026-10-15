@@ -11,7 +11,7 @@ class TarotCard {
   final String keywords;
   final String guidance;
   final String prompt;
-  String get asset => 'lib/assets/Tarot Deck/$id.png';
+  String get asset => 'lib/assets/tarot_webp/$id.webp';
 }
 
 class TarotDeck {
